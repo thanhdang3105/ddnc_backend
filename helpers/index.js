@@ -1,7 +1,13 @@
-const generateAccessToken = require('./generateAccessToken');
+const handleAccessToken = require('./handleAccessToken');
+const hashPassword = require('./hashPassword');
+const comparePassword = require('./comparePassword');
+const checkEmail = require('./checkEmail');
 
 const heplers = {
-    generateAccessToken
+    handleAccessToken,
+    hashPassword,
+    comparePassword,
+    checkEmail
 }
 
 module.exports = heplers

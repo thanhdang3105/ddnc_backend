@@ -1,19 +1,17 @@
 const { DataTypes } = require('sequelize');
 const sequelize = require('../utils/database.js');
 
-const Users = sequelize.define('Users', {
+const Tables = sequelize.define('Tables', {
     ID: {
         type: DataTypes.UUID,
         defaultValue: DataTypes.UUIDV4,
         primaryKey: true
     },
     name: DataTypes.STRING,
-    email: {
-        type: DataTypes.STRING,
-        unique: true
-    },
-    password: DataTypes.STRING,
-    token: DataTypes.STRING
+    createdBy: {
+        type: DataTypes.UUID,
+        allowNull: false
+    }
 });
 
-module.exports = Users;
+module.exports = Tables;

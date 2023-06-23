@@ -3,7 +3,7 @@ require('dotenv').config()
 
 const sequelize = require('./utils/database.js');
 
-const routes = require('./routes/routes.js');
+const routes = require('./routes');
 
 const app = express();
 
@@ -20,7 +20,7 @@ app.use((_, res, next) => {
 
 routes(app);
 
-sequelize.sync();
+sequelize.sync({ alter: true });
 
 app.listen(process.env.PORT, () => {
     console.log(`App listening at http://localhost:${process.env.PORT}/`)
