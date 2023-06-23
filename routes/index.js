@@ -10,6 +10,7 @@ const authAdmin = require("../polices/authAdmin");
 const adminRoutes = require("./adminRoutes");
 const ordersRoutes = require("./ordersRoutes");
 const ProductsController = require("../controllers/ProductsController");
+const TalbeController = require("../controllers/TableController");
 
 function routes(app){
 
@@ -30,6 +31,8 @@ function routes(app){
     app.post('/users/updateProfile', authorization, UsersController.updateProfile)
 
     app.get('/products/getAll', authorization, ProductsController.getAllProduct)
+
+    app.get('/tables/getAll', authorization, TalbeController.getAll)
 
     app.use('/admin', authAdmin, adminRoutes)
 

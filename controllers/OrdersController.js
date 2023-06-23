@@ -1,6 +1,7 @@
 const { Op } = require("sequelize");
 const OrderDetail = require("../models/orderDetail");
 const Orders = require("../models/orders");
+const Products = require("../models/products");
 
 
 const OrdersController = {
@@ -115,6 +116,49 @@ const OrdersController = {
                 errMsg: 'System error!', 
             })
         }
+    },
+    getByTableID: async (req,res) => {
+        try {
+            let { ID } = req.params
+
+            if(!ID) return res.json({ errCode: 400, errMsg: 'Table not found!'});
+
+            let listOrders = await Orders.findAll({ where: {
+                tableId: ID,
+                }, raw: true
+            })
+            for (let order of listOrders) {
+                if (order?.ID) {
+                    let details = await OrderDetail.findAll({
+                        where: {
+                            orderID: order.ID
+                        }, raw: true
+                    })
+                    let listProduct = []
+                    for (let detail of details) {
+                        if(detail?.productId){
+                            let product = await Products.findOne({
+                                where: {
+                                    ID: detail.productId
+                                }, raw: true
+                            })
+                            listProduct.push({
+                                ...product,
+                                quantity: detail.quantity
+                            })
+                        }
+                    }
+                    order.products = listProduct
+                }
+            }
+
+            return res.json({ errCode: 200, errMsg: 'Success!', data: listOrders})
+        } catch(err) {
+            console.log(err)
+            return res.json({ errCode: 500, errMsg: 'System error!' })
+
+        }
+
     }
 }
 

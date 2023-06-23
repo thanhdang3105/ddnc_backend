@@ -16,7 +16,22 @@ const TalbeController = {
             errCode: 200,
             data: newTable,
         });
-
+    },
+    getAll: async (req, res) => {
+        try {
+            let listTables = await Tables.findAll({ where: {}})
+            return res.json({
+                errCode: 200,
+                errMsg: 'Success',
+                data: listTables
+            })
+        } catch(err) {
+            console.log(err);
+            return res.json({
+                errCode: 500,
+                errMsg: 'System error!',
+            })
+        }
     }
 }
 

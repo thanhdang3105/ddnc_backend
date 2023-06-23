@@ -37,7 +37,7 @@ const UsersController = {
             let { email, password } = req.body
             if(!email && !password) return res.json({ errCode: 500, errMsg: 'Invalid params!'})
             if(checkEmail(email)){
-                let user = await Users.findOne({ where: {email}})
+                let user = await Users.findOne({ where: { email }})
                 if(!user || !comparePassword(password, user.password)) {
                     return res.json({ errCode: 400, errMsg: 'Invalid email or password!' })
                 }else {
@@ -96,6 +96,23 @@ const UsersController = {
         }catch(err) {
             console.log(err)
             return res.json({errCode: 500, errMsg: "System Error!"});
+        }
+    },
+    updateRole: async (req,res) => {
+        try {
+            let { ID, role } = req.body;
+
+            if(!ID) return res.json({errCode: 400, errMsg: 'User not found!'});
+
+            if (!['employee','manager','admin'].includes(role)){
+                return res.json({errCode: 400, errMsg: 'Invalid role!'});
+            }
+
+            await Users.update({ role }, { where: { ID }})
+
+            return res.json({errCode: 200, errMsg: 'Update success, now user is: ' + role})
+        }catch(err) {
+            return res.json({ errCode: 500, errMsg: 'System Error!' });
         }
     },
     deleteUser: async (req,res) => {

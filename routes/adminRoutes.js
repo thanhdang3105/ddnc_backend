@@ -14,8 +14,10 @@ router.post('/createProduct', ProductsController.createProduct);
 
 router.post('/updateProduct', ProductsController.updateProduct);
 
+
 router.get('/deleteProduct/:ID', ProductsController.deleteProduct);
 
+router.post('/updateUserRole', UsersController.updateRole);
 // router.post('/createProduct', ProductsController.createProduct);
 
 
