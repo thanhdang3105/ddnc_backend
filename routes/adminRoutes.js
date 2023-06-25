@@ -6,16 +6,18 @@ const TalbeController = require('../controllers/TableController');
 const router = express.Router();
 
 
-router.get('/deleteUser/:ID', UsersController.deleteUser);
+router.delete('/deleteUser/:ID', UsersController.deleteUser);
 
 router.post('/createTable', TalbeController.createTable);
+
+router.post('/updateTable', TalbeController.updateTable);
 
 router.post('/createProduct', ProductsController.createProduct);
 
 router.post('/updateProduct', ProductsController.updateProduct);
 
 
-router.get('/deleteProduct/:ID', ProductsController.deleteProduct);
+router.delete('/deleteProduct/:ID', ProductsController.deleteProduct);
 
 router.post('/updateUserRole', UsersController.updateRole);
 // router.post('/createProduct', ProductsController.createProduct);

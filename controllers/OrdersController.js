@@ -158,7 +158,37 @@ const OrdersController = {
             return res.json({ errCode: 500, errMsg: 'System error!' })
 
         }
+    },
+    getDetailOrder: async (req, res) => {
+        try {
+            let { ID } = req.params
 
+            if(!ID) return res.json({ errCode: 400, errMsg: 'Table not found!'});
+
+            let details = await OrderDetail.findAll({
+                where: {
+                    orderID: ID
+                }, raw: true
+            })
+            let listProduct = []
+            for (let detail of details) {
+                if(detail?.productId){
+                    let product = await Products.findOne({
+                        where: {
+                            ID: detail.productId
+                        }, raw: true
+                    })
+                    listProduct.push({
+                        ...product,
+                        quantity: detail.quantity
+                    })
+                }
+            }
+            return res.json({ errCode: 200, errMsg: 'Success!', data: listProduct})
+        } catch(err) {
+            console.log(err)
+            return res.json({ errCode: 500, errMsg: 'System error!' })
+        }
     }
 }
 

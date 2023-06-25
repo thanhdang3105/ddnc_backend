@@ -5,12 +5,13 @@ const Users = require('../models/users');
 async function authorization(req, res, next) {
     try{
         let auth = req.headers.authorization || `Bearer ${req.query.token}`;
-
         if (!auth || !auth.startsWith("Bearer ")) {
             return res.json({errCode: 401, errMsg: "Invalid token"});
         }
 
         let token = auth.split(" ")[1];
+
+        if(!token) return res.json({errCode: 401, errMsg: "Invalid token"});
 
         let verifyToken = verify(token)
         if (verifyToken?.errCode === 0) {
