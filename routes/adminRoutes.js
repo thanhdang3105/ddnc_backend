@@ -12,6 +12,8 @@ router.post('/createTable', TalbeController.createTable);
 
 router.post('/updateTable', TalbeController.updateTable);
 
+router.delete('/deleteTable/:ID', TalbeController.deleteTable);
+
 router.post('/createProduct', ProductsController.createProduct);
 
 router.post('/updateProduct', ProductsController.updateProduct);

@@ -15,7 +15,7 @@ async function authAdmin(req, res, next) {
         let verifyToken = verify(token)
         if (verifyToken?.errCode === 0) {
             let { info } = verifyToken;
-            if(!info?.email || (info?.email && !checkEmail(info.email))){
+            if(!info?.email || (info?.email && (info.email !== 'ROOT' && !checkEmail(info.email)))){
                 return res.json({errCode: 401, errMsg: "Token is wrong!"});
             }
             const user = await Users.findOne({

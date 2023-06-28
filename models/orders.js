@@ -11,7 +11,7 @@ const Orders = sequelize.define('Orders', {
     status: {
         type: DataTypes.STRING,
         defaultValue: 'started'
-    }, // started / inProgess / finished
+    }, // started / inProgess / finished / cancelled
     tableId: {
         type: DataTypes.UUID,
         allowNull: false
