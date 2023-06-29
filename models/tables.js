@@ -11,6 +11,10 @@ const Tables = sequelize.define('Tables', {
     createdBy: {
         type: DataTypes.UUID,
         allowNull: false
+    },
+    isDeleted: {
+        type: DataTypes.BOOLEAN,
+        defaultValue: false
     }
 });
 

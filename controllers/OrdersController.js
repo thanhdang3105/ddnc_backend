@@ -117,6 +117,19 @@ const OrdersController = {
             })
         }
     },
+    changeStatusOrder: async (req,res) => {
+        try {
+            let { ID, status } = req.body;
+            if (!ID) return res.json({ errCode: 401, errMsg: 'Order not found!' });
+            if (!['started', 'inProgess', 'finished', 'cancelled'].includes(status)) return res.json({ errCode: 401, errMsg: 'Status is not support!' });
+
+            let orderUpdated = await Orders.update({ status }, { where: { ID }})
+            console.log(orderUpdated);
+            return res.json({ errCode: 200, errMsg: 'Status updated' });
+        } catch (err) {
+
+        }
+    },
     getByTableID: async (req,res) => {
         try {
             let { ID } = req.params

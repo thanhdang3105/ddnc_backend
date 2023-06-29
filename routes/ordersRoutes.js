@@ -11,5 +11,7 @@ router.post('/create', OrdersController.createOrder);
 
 router.post('/update', OrdersController.updateOrder);
 
+router.post('/updateStatus', OrdersController.changeStatusOrder);
+
 
 module.exports = router;

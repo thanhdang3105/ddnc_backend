@@ -20,7 +20,9 @@ const TalbeController = {
     },
     getAll: async (req, res) => {
         try {
-            let listTables = await Tables.findAll({ where: {}})
+            let listTables = await Tables.findAll({ where: {
+                isDeleted: false
+            }, order: [['createdAt', 'DESC']] })
             return res.json({
                 errCode: 200,
                 errMsg: 'Success',
@@ -34,7 +36,7 @@ const TalbeController = {
             })
         }
     },
-    updateTable: async () => {
+    updateTable: async (req, res) => {
         try {
             let { ID, name } = req.body;
 
@@ -43,6 +45,23 @@ const TalbeController = {
             const tableUpdated = await Tables.update({ name }, { where: { ID } });
             console.log(tableUpdated)
             return res.json({ errCode: 200, errMsg: 'Updated successfully!' });
+
+        } catch(err) {
+            console.log(err);
+            return res.json({
+                errCode: 500,
+                errMsg: 'System error!',
+            })
+        }
+    },
+    deleteTable: async (req, res) => {
+        try {
+            let { ID } = req.params;
+
+            if (!ID) return res.json({ errCode: 400, errMsg: 'Table not found!' });
+
+            await Tables.update({ isDeleted: true },{ where: { ID } });
+            return res.json({ errCode: 200, errMsg: 'Table delete successfully!' });
 
         } catch(err) {
             console.log(err);
