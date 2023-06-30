@@ -10,6 +10,10 @@ const Products = sequelize.define('Products', {
     name: DataTypes.STRING,
     price: DataTypes.DOUBLE,
     unit: DataTypes.STRING,
+    isDeleted: {
+        type: DataTypes.BOOLEAN,
+        defaultValue: false
+    },
     isClose: {
         type: DataTypes.BOOLEAN,
         defaultValue: false

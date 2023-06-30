@@ -62,7 +62,7 @@ const UsersController = {
     updateProfile: async (req,res) => {
         try {
             let { user } = req,
-            { name, password } = req.body
+            { name, password, currentPWD } = req.body
             
             if(!name && !password){
                 return res.json({ errCode: 500, errMsg: 'Invalid params!'}) 
@@ -74,6 +74,9 @@ const UsersController = {
                 opts.name = name
             }
             if(password) {
+                if (!comparePassword(currentPWD, user.password)) {
+                    return res.json({ errCode: 400, errMsg: 'Invalid current password!' })
+                }
                 let passwordHash = hashPassword(password)
                 if(!passwordHash) return res.json({ errCode: 500, errMsg: 'System Error!'})
                 opts.password = passwordHash
@@ -90,7 +93,7 @@ const UsersController = {
             }
 
             return res.json({
-                errCode: 400,
+                errCode: 401,
                 errMsg: 'Update failed!'
             })
         }catch(err) {

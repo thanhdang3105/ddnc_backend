@@ -20,7 +20,7 @@ app.use((_, res, next) => {
 
 routes(app);
 
-sequelize.sync();
+sequelize.sync({alter: true});
 
 app.listen(process.env.PORT, () => {
     console.log(`App listening at http://localhost:${process.env.PORT}/`)
