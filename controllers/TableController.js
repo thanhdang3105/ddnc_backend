@@ -41,10 +41,12 @@ const TalbeController = {
             let { ID, name } = req.body;
 
             if (!ID || !name) return res.json({ errCode: 400, errMsg: 'Invalid params!' });
-
             const tableUpdated = await Tables.update({ name }, { where: { ID } });
-            console.log(tableUpdated)
-            return res.json({ errCode: 200, errMsg: 'Updated successfully!' });
+            if (tableUpdated?.[0]){
+                return res.json({ errCode: 200, errMsg: 'Updated successfully!' });
+            }else {
+                return res.json({ errCode: 400, errMsg: 'Table not found!' });
+            }
 
         } catch(err) {
             console.log(err);

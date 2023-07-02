@@ -1,11 +1,13 @@
 const express = require('express');
-require('dotenv').config()
-
+require('dotenv').config();
+const cors = require('cors');
 const sequelize = require('./utils/database.js');
 
 const routes = require('./routes');
 
 const app = express();
+
+app.use(cors())
 
 app.use(express.urlencoded({ extended: true }));
 
@@ -20,7 +22,7 @@ app.use((_, res, next) => {
 
 routes(app);
 
-sequelize.sync();
+sequelize.sync({alter: true});
 
 app.listen(process.env.PORT, () => {
     console.log(`App listening at http://localhost:${process.env.PORT}/`)
