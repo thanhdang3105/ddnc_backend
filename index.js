@@ -1,11 +1,13 @@
 const express = require('express');
-require('dotenv').config()
-
+require('dotenv').config();
+const cors = require('cors');
 const sequelize = require('./utils/database.js');
 
 const routes = require('./routes');
 
 const app = express();
+
+app.use(cors())
 
 app.use(express.urlencoded({ extended: true }));
 

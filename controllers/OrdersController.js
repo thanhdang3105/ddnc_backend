@@ -204,7 +204,9 @@ const OrdersController = {
                             }
                         }
                     }
-                    total += totalRevenue
+                    if (order.status == "finished") {
+                        total += totalRevenue
+                    }
                 }
             }
 
@@ -226,28 +228,6 @@ const OrdersController = {
                     ID: ID,
                 }, raw: true
             })
-            // if (ID) {
-            //     let details = await OrderDetail.findAll({
-            //         where: {
-            //             orderID: order.ID
-            //         }, raw: true
-            //     })
-            //     let listProduct = []
-            //     for (let detail of details) {
-            //         if (detail?.productId) {
-            //             let product = await Products.findOne({
-            //                 where: {
-            //                     ID: detail.productId
-            //                 }, raw: true
-            //             })
-            //             listProduct.push({
-            //                 ...product,
-            //                 quantity: detail.quantity
-            //             })
-            //         }
-            //     }
-            //     order.products = listProduct
-            // }
 
             return res.json({ errCode: 200, errMsg: 'Success!', data: listOrders })
         } catch (err) {
