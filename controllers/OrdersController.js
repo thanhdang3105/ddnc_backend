@@ -2,6 +2,7 @@ const { Op } = require("sequelize");
 const OrderDetail = require("../models/orderDetail");
 const Orders = require("../models/orders");
 const Products = require("../models/products");
+const Tables = require("../models/tables");
 
 
 const OrdersController = {
@@ -11,6 +12,18 @@ const OrdersController = {
                 { user } = req;
 
             if (!user || !tableId) return res.json({ errCode: 401, errMsg: 'Invalid params!' });
+            
+            const table = await Tables.findOne({ where: { ID: tableId, isDeleted: false }, raw: true });
+            if (!table) {
+                return res.json({ errCode: 401, errMsg: 'Table not found or deleted!' });
+            }
+            if (!name) {
+                let countOrder = await Orders.count({ 
+                    where: {
+                        tableId: table.ID,
+                    }})
+                name = table.name + ' - ' + (countOrder + 1);
+            }
 
             let newOrder = await Orders.create({
                 name, tableId, createdBy: user.ID

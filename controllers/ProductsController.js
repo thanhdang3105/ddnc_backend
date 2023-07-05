@@ -45,7 +45,7 @@ const ProductsController = {
             if(price) otps.price = price
             if(unit) otps.unit = unit
 
-            let productUpdated = await Products.update(otps,{
+            await Products.update(otps,{
                 where: {
                     ID
                 },

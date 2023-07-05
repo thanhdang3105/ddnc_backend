@@ -1,35 +1,61 @@
 const Users = require("../models/users");
 const { checkEmail, handleAccessToken, hashPassword, comparePassword } = require("../helpers");
+const { handleAccessToken: { verify } } = require('../helpers');
+const { Op } = require("sequelize");
 
 
 const UsersController = {
+    loginWithToken: async (req, res) => {
+        try {
+            let { token } = req.params;
+            if (!token) return res.json({errCode: 500, errMsg: 'Invalid token!'});
+            let verifyToken = verify(token)
+            if (verifyToken?.errCode === 0) {
+                let { info } = verifyToken;
+                if(!info?.email || (info?.email && (info.email !== 'ROOT' && !checkEmail(info.email)))){
+                    return res.json({errCode: 401, errMsg: "Token is wrong!"});
+                }
+                const user = await Users.findOne({
+                    where: {
+                        email: info.email
+                    }, raw: true
+                })
+                if(!user){
+                    return res.json({errCode: 401, errMsg: "User not found!"});
+                }
+                return res.json({errCode: 200, errMsg: "Login Success!", data: user});
+            }
+            return res.json({errCode: 500, errMsg: 'Login failed!'});
+        } catch (e) {
+            console.log(e);
+            return res.json({errCode: 500, errMsg: 'Login failed!'});
+        }
+    },
     register: async (req, res) => {
         try{
             let { email, password, name, role } = req.body
-            if(!email && !password && !name) return res.json({ errCode: 500, errMsg: 'Invalid params!'})
+            if(!email && !password && !name) return res.json({ errCode: 500, errMsg: 'Invalid params!'});
             
             if(checkEmail(email)){
                 if(!['employee','manager','admin'].includes(role)){
                     role = 'employee';
                 }
-                const accessToken = handleAccessToken.generate({ email, role })
                 let passwordHash = hashPassword(password)
-                if(!passwordHash) return res.json({ errCode: 500, errMsg: 'System Error!'})
-                let userCreated = await Users.create({name, email, password: passwordHash, role},{ returning: true })
+                if(!passwordHash) return res.json({ errCode: 500, errMsg: 'System Error!'});
+                let userCreated = await Users.create({name, email, password: passwordHash, role},{ returning: true });
                 userCreated = userCreated.dataValues
                 delete userCreated.password
-                userCreated.token = accessToken
                 res.json({
                     errCode: 200,
                     errMsg: 'Register Account Success!',
                     data: userCreated
                 })
             }else {
-                return res.json({ errCode: 500, errMsg: 'Email wrong format!' })
+                return res.json({ errCode: 500, errMsg: 'Email wrong format!' });
             }
         }catch(err){
             console.log(err);
-            res.json({errCode: 500, errMsg: 'Register Account failed!'})
+            return res.json({errCode: 500, errMsg: 'Register Account failed!'});
         }
     },
     login: async (req,res) => {
@@ -56,7 +82,7 @@ const UsersController = {
             }
         }catch(err){
             console.log(err);
-            res.json({errCode: 500, errMsg: 'Login failed!'})
+            return res.json({errCode: 500, errMsg: 'Login failed!'})
         }
     },
     updateProfile: async (req,res) => {
@@ -118,16 +144,39 @@ const UsersController = {
             return res.json({ errCode: 500, errMsg: 'System Error!' });
         }
     },
-    deleteUser: async (req,res) => {
+    lockOrUnlockUser: async (req,res) => {
         try {
-            let { ID } = req.params
-    
-            if(!ID) return res.json({errCode: 404, errMsg: 'Delete User Failed!'});
-    
-            await Users.destroy({ where: { ID }})
-    
-            return res.json({errCode: 200, errMsg: `Delete User: ${ID} successfully!`});
+            let { ID } = req.params,
+            { isLocked } = req.body
+            if(!ID) return res.json({errCode: 404, errMsg: 'User not found!'});
+            if (![true, false].includes(isLocked)) return res.json({errCode: 404, errMsg: 'System error!'});
+
+            let user = await Users.update({ locked: isLocked },{ where: { ID }})
+            if (user[0]) {
+                return res.json({errCode: 200, errMsg: `${isLocked ? 'User is locked!' : 'User is unlocked'}`});
+            } else {
+                return res.json({errCode: 401, errMsg: `${isLocked ? 'User locked' : 'User unlocked'} failed!`});
+            }
         }catch (err) {
+            console.log(err);
+            return res.json({errCode: 500, errMsg: 'System error!'});
+        }
+    },
+    getAllUsers: async (req, res) => {
+        try {
+            let { user } = req;
+            if (!user) return res.json({errCode: 401, errMsg: 'Forbidden!'});
+            let opts = {
+                role: 'employee',
+            }
+            if (user.role === 'admin') {
+                opts.role = { [Op.in]: ['employee', 'manager'] }
+            }
+            const listUsers = await Users.findAll({ where: opts, raw: true, attributes: { exclude: ['password'] }, order: [['createdAt', 'DESC']] });
+
+            return res.json({errCode: 200, errMsg: `Successfully!`, data: listUsers});
+
+        } catch(err) {
             console.log(err);
             return res.json({errCode: 500, errMsg: 'System error!'});
         }

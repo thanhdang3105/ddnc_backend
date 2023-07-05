@@ -24,11 +24,13 @@ function routes(app){
         res.status(200).json({ message: 'Connect service ok!' });
     })
 
-    app.post('/users/register', UsersController.register)
+    app.get('/users/loginWithToken/:token', UsersController.loginWithToken)
 
     app.post('/users/login', UsersController.login)
 
     app.post('/users/updateProfile', authorization, UsersController.updateProfile)
+
+    app.get('/users/getAll', authorization, UsersController.getAllUsers);
 
     app.get('/products/getAll', authorization, ProductsController.getAllProduct)
 
