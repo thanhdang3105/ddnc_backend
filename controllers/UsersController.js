@@ -1,7 +1,7 @@
 const Users = require("../models/users");
 const { checkEmail, handleAccessToken, hashPassword, comparePassword } = require("../helpers");
 const { handleAccessToken: { verify } } = require('../helpers');
-const { Op } = require("sequelize");
+const { Op, where } = require("sequelize");
 
 
 const UsersController = {
@@ -109,8 +109,8 @@ const UsersController = {
             }
 
             if(Object.keys(opts).length > 0) {
-                let userUpdated = await Users.update(opts, { where: { ID: user.ID }, returning: true })
-                if(userUpdated[1] === 1) {
+                let userUpdated = await Users.update(opts, { where: { ID: user.ID } })
+                if(userUpdated[0]) {
                     return res.json({
                         errCode: 200,
                         errMsg: 'Update success!',
@@ -176,6 +176,31 @@ const UsersController = {
 
             return res.json({errCode: 200, errMsg: `Successfully!`, data: listUsers});
 
+        } catch(err) {
+            console.log(err);
+            return res.json({errCode: 500, errMsg: 'System error!'});
+        }
+    },
+    resetPassword: async (req, res) => {
+        try {
+            let { ID } = req.params;
+            if (!ID) return res.json({errCode: 401, errMsg: 'User not found!'});
+
+            const newPWD = Math.random().toString(36).slice(-6);
+
+            const pwdHash = hashPassword(newPWD);
+
+            let updated = await Users.update({ password: pwdHash }, {
+                where: {
+                    ID
+                }
+            })
+
+            if (updated[0]){
+                return res.json({errCode: 200, errMsg: `Successfully!`, data: newPWD});
+            } else {
+                return res.json({errCode: 401, errMsg: `Reset password failed!`});
+            }
         } catch(err) {
             console.log(err);
             return res.json({errCode: 500, errMsg: 'System error!'});

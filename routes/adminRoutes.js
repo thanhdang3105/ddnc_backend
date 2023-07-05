@@ -28,7 +28,9 @@ router.delete('/deleteProduct/:ID', ProductsController.deleteProduct);
 
 router.post('/updateUserRole', UsersController.updateRole);
 
-router.post('/createUser', UsersController.register)
+router.post('/createUser', UsersController.register);
+
+router.get('/resetPassword/:ID', UsersController.resetPassword);
 // router.post('/createProduct', ProductsController.createProduct);
 
 
