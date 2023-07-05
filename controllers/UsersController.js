@@ -39,7 +39,7 @@ const UsersController = {
             if(email === 'ROOT' || checkEmail(email)){
                 let user = await Users.findOne({ where: { email }})
                 if(!user || !comparePassword(password, user.password)) {
-                    return res.json({ errCode: 400, errMsg: 'Invalid email or password!' })
+                    return res.json({ errCode: 401, errMsg: 'Invalid email or password!' })
                 }else {
                     const accessToken = handleAccessToken.generate({ email, role: user.role })
                     user = user.dataValues
@@ -75,7 +75,7 @@ const UsersController = {
             }
             if(password) {
                 if (!comparePassword(currentPWD, user.password)) {
-                    return res.json({ errCode: 400, errMsg: 'Invalid current password!' })
+                    return res.json({ errCode: 401, errMsg: 'Invalid current password!' })
                 }
                 let passwordHash = hashPassword(password)
                 if(!passwordHash) return res.json({ errCode: 500, errMsg: 'System Error!'})
@@ -105,10 +105,10 @@ const UsersController = {
         try {
             let { ID, role } = req.body;
 
-            if(!ID) return res.json({errCode: 400, errMsg: 'User not found!'});
+            if(!ID) return res.json({errCode: 401, errMsg: 'User not found!'});
 
             if (!['employee','manager','admin'].includes(role)){
-                return res.json({errCode: 400, errMsg: 'Invalid role!'});
+                return res.json({errCode: 401, errMsg: 'Invalid role!'});
             }
 
             await Users.update({ role }, { where: { ID }})

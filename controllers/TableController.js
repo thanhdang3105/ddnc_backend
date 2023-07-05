@@ -6,7 +6,7 @@ const TalbeController = {
         let { name } = req.body,
         { user } = req;
 
-        if (!name) return res.json({ errCode: 400, errMsg: 'Invalid params!' });
+        if (!name) return res.json({ errCode: 401, errMsg: 'Invalid params!' });
 
         let newTable = await Tables.create({
             name, createdBy: user.ID
@@ -40,12 +40,12 @@ const TalbeController = {
         try {
             let { ID, name } = req.body;
 
-            if (!ID || !name) return res.json({ errCode: 400, errMsg: 'Invalid params!' });
+            if (!ID || !name) return res.json({ errCode: 401, errMsg: 'Invalid params!' });
             const tableUpdated = await Tables.update({ name }, { where: { ID } });
             if (tableUpdated?.[0]){
                 return res.json({ errCode: 200, errMsg: 'Updated successfully!' });
             }else {
-                return res.json({ errCode: 400, errMsg: 'Table not found!' });
+                return res.json({ errCode: 401, errMsg: 'Table not found!' });
             }
 
         } catch(err) {
@@ -60,7 +60,7 @@ const TalbeController = {
         try {
             let { ID } = req.params;
 
-            if (!ID) return res.json({ errCode: 400, errMsg: 'Table not found!' });
+            if (!ID) return res.json({ errCode: 401, errMsg: 'Table not found!' });
 
             await Tables.update({ isDeleted: true },{ where: { ID } });
             return res.json({ errCode: 200, errMsg: 'Table delete successfully!' });

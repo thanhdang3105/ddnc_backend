@@ -10,7 +10,7 @@ const OrdersController = {
             let { name, tableId, listProduct } = req.body,
                 { user } = req;
 
-            if (!user || !tableId) return res.json({ errCode: 400, errMsg: 'Invalid params!' });
+            if (!user || !tableId) return res.json({ errCode: 401, errMsg: 'Invalid params!' });
 
             let newOrder = await Orders.create({
                 name, tableId, createdBy: user.ID
@@ -43,7 +43,7 @@ const OrdersController = {
             let { user } = req,
                 { ID, name, tableId, listProduct } = req.body;
 
-            if (!ID) return res.json({ errCode: 400, errMsg: 'Order not found!' });
+            if (!ID) return res.json({ errCode: 401, errMsg: 'Order not found!' });
 
             let opts = {}
 
@@ -129,8 +129,11 @@ const OrdersController = {
             if (!['started', 'inProgess', 'finished', 'cancelled'].includes(status)) return res.json({ errCode: 401, errMsg: 'Status is not support!' });
 
             let orderUpdated = await Orders.update({ status }, { where: { ID } })
-            console.log(orderUpdated);
-            return res.json({ errCode: 200, errMsg: 'Status updated' });
+            if (orderUpdated[0]) {
+                return res.json({ errCode: 200, errMsg: 'Status updated' });
+            } else {
+                return res.json({ errCode: 401, errMsg: 'Status update fail!' });
+            }
         } catch (err) {
 
         }
@@ -139,7 +142,7 @@ const OrdersController = {
         try {
             let { ID } = req.params
 
-            if (!ID) return res.json({ errCode: 400, errMsg: 'Table not found!' });
+            if (!ID) return res.json({ errCode: 401, errMsg: 'Table not found!' });
 
             let listOrders = await Orders.findAll({
                 where: {
@@ -221,7 +224,7 @@ const OrdersController = {
         try {
             let { ID } = req.params
 
-            if (!ID) return res.json({ errCode: 400, errMsg: 'Order not found!' });
+            if (!ID) return res.json({ errCode: 401, errMsg: 'Order not found!' });
 
             let listOrders = await Orders.findOne({
                 where: {
@@ -240,7 +243,7 @@ const OrdersController = {
         try {
             let { ID } = req.params
 
-            if (!ID) return res.json({ errCode: 400, errMsg: 'Table not found!' });
+            if (!ID) return res.json({ errCode: 401, errMsg: 'Table not found!' });
 
             let details = await OrderDetail.findAll({
                 where: {
