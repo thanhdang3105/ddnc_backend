@@ -22,12 +22,14 @@ async function authorization(req, res, next) {
             const user = await Users.findOne({
                 where: {
                     email: info.email
-                }
+                }, raw: true
             })
-            if(!user?.dataValues){
+            if(!user){
                 return res.json({errCode: 400, errMsg: "User not found!"});
+            } else if (user.locked) {
+                return res.json({errCode: 401, errMsg: "User is locked!"});
             }
-            req.user = user.dataValues
+            req.user = user
             return next();
         }
         

@@ -196,7 +196,13 @@ const OrdersController = {
     },
     getAllOrders: async (req, res) => {
         try {
+            let { status } = req.body;
+            let opts = {}
+            if (status) {
+                opts.status = status
+            }
             let listOrders = await Orders.findAll({
+                where: opts,
                 raw: true
             })
             let total = 0

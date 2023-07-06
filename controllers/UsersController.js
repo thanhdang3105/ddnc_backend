@@ -17,11 +17,13 @@ const UsersController = {
                 }
                 const user = await Users.findOne({
                     where: {
-                        email: info.email
+                        email: info.email,
                     }, raw: true
                 })
                 if(!user){
                     return res.json({errCode: 401, errMsg: "User not found!"});
+                } else if (user.locked){
+                    return res.json({errCode: 401, errMsg: "User is locked!"});
                 }
                 return res.json({errCode: 200, errMsg: "Login Success!", data: user});
             }
@@ -66,7 +68,9 @@ const UsersController = {
                 let user = await Users.findOne({ where: { email }})
                 if(!user || !comparePassword(password, user.password)) {
                     return res.json({ errCode: 401, errMsg: 'Invalid email or password!' })
-                }else {
+                }else if (user.locked) {
+                    return res.json({errCode: 401, errMsg: "User is locked!"});
+                } else {
                     const accessToken = handleAccessToken.generate({ email, role: user.role })
                     user = user.dataValues
                     user.token = accessToken
@@ -88,9 +92,9 @@ const UsersController = {
     updateProfile: async (req,res) => {
         try {
             let { user } = req,
-            { name, password, currentPWD } = req.body
+            { ID, name, password, currentPWD } = req.body
             
-            if(!name && !password){
+            if(!ID || (!name && !password)){
                 return res.json({ errCode: 500, errMsg: 'Invalid params!'}) 
             }
 
@@ -109,7 +113,7 @@ const UsersController = {
             }
 
             if(Object.keys(opts).length > 0) {
-                let userUpdated = await Users.update(opts, { where: { ID: user.ID } })
+                let userUpdated = await Users.update(opts, { where: { ID } })
                 if(userUpdated[0]) {
                     return res.json({
                         errCode: 200,
@@ -137,9 +141,14 @@ const UsersController = {
                 return res.json({errCode: 401, errMsg: 'Invalid role!'});
             }
 
-            await Users.update({ role }, { where: { ID }})
+            let updated = await Users.update({ role }, { where: { ID }})
 
-            return res.json({errCode: 200, errMsg: 'Update success, now user is: ' + role})
+            if (updated[0]) {
+                return res.json({errCode: 200, errMsg: 'Update success, now user is: ' + role})
+            } else {
+                return res.json({errCode: 401, errMsg: 'Update failed!'});
+            }
+
         }catch(err) {
             return res.json({ errCode: 500, errMsg: 'System Error!' });
         }
