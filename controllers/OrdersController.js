@@ -160,7 +160,8 @@ const OrdersController = {
             let listOrders = await Orders.findAll({
                 where: {
                     tableId: ID,
-                }, raw: true
+                }, raw: true,
+                order: [['createdAt', 'DESC']]
             })
             for (let order of listOrders) {
                 if (order?.ID) {
@@ -203,7 +204,8 @@ const OrdersController = {
             }
             let listOrders = await Orders.findAll({
                 where: opts,
-                raw: true
+                raw: true,
+                order: [['createdAt', 'DESC']]
             })
             let total = 0
             for (let order of listOrders) {
