@@ -13,6 +13,10 @@ const Users = sequelize.define('Users', {
         unique: true
     },
     password: DataTypes.STRING,
+    locked: {
+        type: DataTypes.BOOLEAN,
+        defaultValue: false
+    },
     role: {
         type: DataTypes.STRING,
         defaultValue: 'employee'

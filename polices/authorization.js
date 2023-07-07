@@ -6,28 +6,30 @@ async function authorization(req, res, next) {
     try{
         let auth = req.headers.authorization || `Bearer ${req.query.token}`;
         if (!auth || !auth.startsWith("Bearer ")) {
-            return res.json({errCode: 401, errMsg: "Invalid token"});
+            return res.json({errCode: 400, errMsg: "Invalid token"});
         }
 
         let token = auth.split(" ")[1];
 
-        if(!token) return res.json({errCode: 401, errMsg: "Invalid token"});
+        if(!token) return res.json({errCode: 400, errMsg: "Invalid token"});
 
         let verifyToken = verify(token)
         if (verifyToken?.errCode === 0) {
             let { info } = verifyToken;
             if(!info?.email || (info?.email && (info.email !== 'ROOT' && !checkEmail(info.email)))){
-                return res.json({errCode: 401, errMsg: "Token is wrong!"});
+                return res.json({errCode: 400, errMsg: "Token is wrong!"});
             }
             const user = await Users.findOne({
                 where: {
                     email: info.email
-                }
+                }, raw: true
             })
-            if(!user?.dataValues){
-                return res.json({errCode: 401, errMsg: "User not found!"});
+            if(!user){
+                return res.json({errCode: 400, errMsg: "User not found!"});
+            } else if (user.locked) {
+                return res.json({errCode: 401, errMsg: "User is locked!"});
             }
-            req.user = user.dataValues
+            req.user = user
             return next();
         }
         
@@ -35,7 +37,7 @@ async function authorization(req, res, next) {
             return res.json({errCode: 400, errMsg: "Token expired!"});
         }
 
-        return res.json({errCode: 401, errMsg: "Forbidden!"});
+        return res.json({errCode: 400, errMsg: "Forbidden!"});
 
     }catch(e){
         console.log(e);
