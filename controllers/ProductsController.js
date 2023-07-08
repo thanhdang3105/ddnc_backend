@@ -44,19 +44,27 @@ const ProductsController = {
             if(name) otps.name = name
             if(price) otps.price = price
             if(unit) otps.unit = unit
-
-            await Products.update(otps,{
+            
+            let updated = await Products.update(otps,{
                 where: {
                     ID
-                },
-                returning: true,
+                }
             })
 
-            return res.json({
-                errCode: 200,
-                errMsg: 'Product update successfully!',
-            })
+            if (updated[0]) {
+                return res.json({
+                    errCode: 200,
+                    errMsg: 'Product update successfully!',
+                })
+            } else {
+                return res.json({
+                    errCode: 500,
+                    errMsg: 'Product update failed!',
+                })
+            }
+
         }catch(err) {
+            console.log(err)
             return res.json({ errCode: 500, errMsg: 'Product update failed!' });
         }
     },
@@ -66,7 +74,7 @@ const ProductsController = {
 
             if(!ID) return res.json({ errCode: 500, errMsg: 'Product not found!' });
 
-            await Products.destroy({ where: { ID }})
+            await Products.update({ isDeleted: true }, { where: { ID }})
             
             return res.json({ errCode: 200, errMsg: 'Product deleted!' });
         } catch(err){
@@ -75,7 +83,7 @@ const ProductsController = {
     },
     getAllProduct: async (req,res) => {
         try {
-            let allProduct = await Products.findAll({})
+            let allProduct = await Products.findAll({where: { isDeleted: false }})
             res.json({ errCode: 200, errMsg: 'Success!', data: allProduct });
         }catch(err) {
             return res.json({ errCode: 500, errMsg: 'System error!' });

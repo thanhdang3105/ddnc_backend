@@ -20,8 +20,6 @@ router.post('/updateProduct', ProductsController.updateProduct);
 
 router.post('/getAllOrders', OrdersController.getAllOrders);
 
-router.get('/getOrderByID/:ID', OrdersController.getOrderByID);
-
 router.post('/createEmployee', UsersController.register);
 
 router.delete('/deleteProduct/:ID', ProductsController.deleteProduct);
