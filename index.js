@@ -4,6 +4,8 @@ const cors = require('cors');
 const sequelize = require('./utils/database.js');
 
 const routes = require('./routes');
+const Users = require('./models/users.js');
+const hashPassword = require('./helpers/hashPassword.js');
 
 const app = express();
 
@@ -19,6 +21,29 @@ app.use((_, res, next) => {
     res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization');
     next();
 });
+
+let checkAdminROOT = async () => {
+    let adminROOT = await Users.findOne({
+        where: {
+            email: 'ROOT'
+        }, raw: true
+    })
+
+    if (adminROOT) return;
+
+    let password = hashPassword(process.env.ADMIN_PASSWORD);
+
+    await Users.create({
+        name: 'admin ROOT', 
+        email: 'ROOT', 
+        password, 
+        role: 'admin'
+    });
+
+}
+
+checkAdminROOT();
+
 
 routes(app);
 
