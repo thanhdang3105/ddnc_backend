@@ -3,6 +3,7 @@ const OrderDetail = require("../models/orderDetail");
 const Orders = require("../models/orders");
 const Products = require("../models/products");
 const Tables = require("../models/tables");
+const Users = require("../models/users");
 
 
 const OrdersController = {
@@ -157,10 +158,12 @@ const OrdersController = {
 
             if (!ID) return res.json({ errCode: 401, errMsg: 'Table not found!' });
 
+            const listUsers = await Users.findAll({raw: true, attributes: { exclude: ['password'] } });
             let listOrders = await Orders.findAll({
                 where: {
                     tableId: ID,
-                }, raw: true
+                }, raw: true,
+                order: [['createdAt', 'DESC']]
             })
             for (let order of listOrders) {
                 if (order?.ID) {
@@ -184,6 +187,12 @@ const OrdersController = {
                         }
                     }
                     order.products = listProduct
+                    if (order.createdBy) {
+                        order.createdBy = listUsers.find(u => u.ID === order.createdBy);
+                    }
+                    if (order.checkoutBy) {
+                        order.checkoutBy = listUsers.find(u => u.ID === order.checkoutBy);
+                    }
                 }
             }
 
@@ -196,14 +205,22 @@ const OrdersController = {
     },
     getAllOrders: async (req, res) => {
         try {
-            let { status } = req.body;
+            let { status, orderBy } = req.body;
             let opts = {}
             if (status) {
                 opts.status = status
             }
+            let order = [['createdAt', 'DESC']]
+
+            if (orderBy) {
+                order = [['createdAt', orderBy]]
+            }
+            
+            const listUsers = await Users.findAll({raw: true, attributes: { include: ['ID', 'name', 'email'] } });
             let listOrders = await Orders.findAll({
                 where: opts,
-                raw: true
+                raw: true,
+                order: order
             })
             let total = 0
             for (let order of listOrders) {
@@ -229,29 +246,16 @@ const OrdersController = {
                     if (order.status == "finished") {
                         total += totalRevenue
                     }
+                    if (order.createdBy) {
+                        order.createdBy = listUsers.find(u => u.ID === order.createdBy);
+                    }
+                    if (order.checkoutBy) {
+                        order.checkoutBy = listUsers.find(u => u.ID === order.checkoutBy);
+                    }
                 }
             }
 
             return res.json({ errCode: 200, errMsg: 'Success!', data: listOrders, totalRevenue: total })
-        } catch (err) {
-            console.log(err)
-            return res.json({ errCode: 500, errMsg: 'System error!' })
-
-        }
-    },
-    getOrderByID: async (req, res) => {
-        try {
-            let { ID } = req.params
-
-            if (!ID) return res.json({ errCode: 401, errMsg: 'Order not found!' });
-
-            let listOrders = await Orders.findOne({
-                where: {
-                    ID: ID,
-                }, raw: true
-            })
-
-            return res.json({ errCode: 200, errMsg: 'Success!', data: listOrders })
         } catch (err) {
             console.log(err)
             return res.json({ errCode: 500, errMsg: 'System error!' })

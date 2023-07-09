@@ -19,7 +19,11 @@ const Orders = sequelize.define('Orders', {
     createdBy: {
         type: DataTypes.UUID,
         allowNull: false
-    } // ID User
+    }, // ID User
+    checkoutBy: {
+        type: DataTypes.UUID,
+        allowNull: true
+    }
 });
 
 module.exports = Orders;

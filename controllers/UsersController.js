@@ -2,6 +2,7 @@ const Users = require("../models/users");
 const { checkEmail, handleAccessToken, hashPassword, comparePassword } = require("../helpers");
 const { handleAccessToken: { verify } } = require('../helpers');
 const { Op, where } = require("sequelize");
+const sendMail = require("../helpers/sendEmail");
 
 
 const UsersController = {
@@ -45,6 +46,13 @@ const UsersController = {
                 let passwordHash = hashPassword(password)
                 if(!passwordHash) return res.json({ errCode: 500, errMsg: 'System Error!'});
                 let userCreated = await Users.create({name, email, password: passwordHash, role},{ returning: true });
+
+                let resultSendMail = await sendMail('newAccount', { email, name, password })
+
+                if (resultSendMail.errCode != 0) {
+                    console.log(resultSendMail);
+                }
+
                 userCreated = userCreated.dataValues
                 delete userCreated.password
                 res.json({
@@ -199,11 +207,25 @@ const UsersController = {
 
             const pwdHash = hashPassword(newPWD);
 
-            let updated = await Users.update({ password: pwdHash }, {
+            let user = await Users.findOne({
                 where: {
                     ID
+                }, raw: true
+            })
+
+            if (!user) return res.json({errCode: 401, errMsg: 'User not found!'});
+
+            let updated = await Users.update({ password: pwdHash }, {
+                where: {
+                    ID: user.ID
                 }
             })
+
+            let resultSendMail = await sendMail('resetPassword', { email: user.email, password: newPWD });
+
+            if (resultSendMail.errCode != 0) {
+                console.log(resultSendMail);
+            }
 
             if (updated[0]){
                 return res.json({errCode: 200, errMsg: `Successfully!`, data: newPWD});
