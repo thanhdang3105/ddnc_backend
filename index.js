@@ -42,12 +42,11 @@ let checkAdminROOT = async () => {
 
 }
 
-checkAdminROOT();
-
-
 routes(app);
 
 sequelize.sync();
+
+checkAdminROOT();
 
 app.listen(process.env.PORT, () => {
     console.log(`App listening at http://localhost:${process.env.PORT}/`)
