@@ -36,16 +36,16 @@ const UsersController = {
     },
     register: async (req, res) => {
         try{
-            let { email, password, name, role } = req.body
-            if(!email && !password && !name) return res.json({ errCode: 500, errMsg: 'Invalid params!'});
+            let { email, password, name } = req.body,
+            { user } = req;
+            if (!email && !password && !name) return res.json({ errCode: 500, errMsg: 'Invalid params!'});
             
+            if (!["manager", "admin"].includes(user.role)) return res.json({ errCode: 401, errMsg: 'Forbidden!'});
+
             if(checkEmail(email)){
-                if(!['employee','manager','admin'].includes(role)){
-                    role = 'employee';
-                }
                 let passwordHash = hashPassword(password)
                 if(!passwordHash) return res.json({ errCode: 500, errMsg: 'System Error!'});
-                let userCreated = await Users.create({name, email, password: passwordHash, role},{ returning: true });
+                let userCreated = await Users.create({name, email, password: passwordHash},{ returning: true });
 
                 let resultSendMail = await sendMail('newAccount', { email, name, password })
 
@@ -145,14 +145,20 @@ const UsersController = {
 
             if(!ID) return res.json({errCode: 401, errMsg: 'User not found!'});
 
-            if (!['employee','manager','admin'].includes(role)){
+            if (role === 'admin') return res.json({errCode: 401, errMsg: 'Forbidden!'});
+
+            if (!['employee','manager'].includes(role)){
                 return res.json({errCode: 401, errMsg: 'Invalid role!'});
             }
+
+            let checkAdminROOT = await Users.findOne({ where : { ID }, raw: true });
+
+            if (checkAdminROOT.email === 'ROOT' || checkAdminROOT.role === 'admin') return res.json({errCode: 401, errMsg: 'Forbidden!'});
 
             let updated = await Users.update({ role }, { where: { ID }})
 
             if (updated[0]) {
-                return res.json({errCode: 200, errMsg: 'Update success, now user is: ' + role})
+                return res.json({errCode: 200, errMsg: `Update success, now user: ${checkAdminROOT.name} is: ` + role})
             } else {
                 return res.json({errCode: 401, errMsg: 'Update failed!'});
             }
