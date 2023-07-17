@@ -138,11 +138,20 @@ const OrdersController = {
     },
     changeStatusOrder: async (req, res) => {
         try {
-            let { ID, status } = req.body;
+            let { ID, status } = req.body,
+            { user } = req;
             if (!ID) return res.json({ errCode: 401, errMsg: 'Order not found!' });
-            if (!['started', 'inProgess', 'finished', 'cancelled'].includes(status)) return res.json({ errCode: 401, errMsg: 'Status is not support!' });
+            if (!['started', 'finished', 'cancelled'].includes(status)) return res.json({ errCode: 401, errMsg: 'Status is not support!' });
 
-            let orderUpdated = await Orders.update({ status }, { where: { ID } })
+            let options = {
+                status
+            }
+
+            if (status === 'finished') {
+                options.checkoutBy = user.ID
+            }
+
+            let orderUpdated = await Orders.update(options, { where: { ID } })
             if (orderUpdated[0]) {
                 return res.json({ errCode: 200, errMsg: 'Status updated' });
             } else {
