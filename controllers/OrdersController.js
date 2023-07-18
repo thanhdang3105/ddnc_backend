@@ -214,7 +214,7 @@ const OrdersController = {
     },
     getAllOrders: async (req, res) => {
         try {
-            let { status, orderBy } = req.body;
+            let { status, orderBy, filterName } = req.body;
             let opts = {}
             if (status) {
                 opts.status = status
@@ -223,6 +223,10 @@ const OrdersController = {
 
             if (orderBy) {
                 order = [['createdAt', orderBy]]
+            }
+
+            if (filterName) {
+                opts.name = { [Op.like]: '%' + filterName + '%' }
             }
             
             const listUsers = await Users.findAll({raw: true, attributes: { include: ['ID', 'name', 'email'] } });
